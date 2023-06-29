@@ -1,7 +1,7 @@
 import amqp from "amqplib";
 
-// キュー名
-const queueName = "queue";
+// エクスチェンジ名
+const exchangeName = "exchange";
 
 const main = async () => {
   // RabbitMQとのTCP接続確立
@@ -20,24 +20,23 @@ const main = async () => {
     console.error("[ERROR] Couldn't create channel.", err);
     return;
   }
-  //await channel.prefetch(1);
   // キューの作成
-  await channel.assertQueue(queueName, {
+  await channel.assertExchange(exchangeName, "fanout", {
     durable: true, // 再起動時にキューを残さない
   });
+  // 無名のTemporaryQueueを定義
+  const queue = await channel.assertQueue("", { exclusive: true });
+  // Binding: ExchangeとTemporaryQueueを関連付ける
+  await channel.bindQueue(queue.queue, exchangeName, "");
   // メッセージの受信
   console.log(
-    `[INFO] Waiting for message in ${queueName}. To exit press CTRL+C`
+    `[INFO] Waiting for message in ${queue.queue}. To exit press CTRL+C`
   );
-  await channel.consume(queueName, async (msg) => {
+  await channel.consume(queue.queue, async (msg) => {
     if (msg) {
       console.log("[INFO] Receive message: " + msg.content.toString());
       // メッセージの受信に成功した為、ACK応答を返す -> キューのメッセージが削除される
       channel.ack(msg);
-      // 論理チャネルの切断
-      await channel.close();
-      // RabbitMQとのTCP接続切断
-      await connection.close();
     } else {
       console.error("[ERROR] Receive null message");
     }

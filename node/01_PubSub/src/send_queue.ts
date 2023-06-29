@@ -1,7 +1,7 @@
 import amqp from "amqplib";
 
-// キュー名
-const queueName = "queue";
+// エクスチェンジ名
+const exchangeName = "exchange";
 
 const main = async () => {
   // RabbitMQとのTCP接続確立
@@ -20,18 +20,17 @@ const main = async () => {
     console.error("[ERROR] Couldn't create channel.", err);
     return;
   }
-  // キューの作成
-  await channel.assertQueue(queueName, {
+  // エクスチェンジの作成
+  await channel.assertExchange(exchangeName, "fanout", {
     durable: true, // RabbitMQサーバーが落ちてもキューを残す設定
   });
   // メッセージの送信
   const message = new Date().getTime().toString();
-  channel.sendToQueue(
-    queueName,
+  channel.publish(
+    exchangeName,
+    "",
     Buffer.from(message),
-    {
-      persistent: true, // RabbitMQサーバーが落ちてもメッセージを残す設定
-    },
+    { persistent: true },
     (err) => {
       // ACK/NACK応答時
       // ACK: メッセージ送信成功応答
