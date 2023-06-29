@@ -1,0 +1,25 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsx esbuild.config.ts",
+    "send_queue": "tsx src/send_queue.ts",
+    "receive_queue": "tsx src/receive_queue.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/amqplib": "^0.10.1",
+    "@types/node": "^20.3.2",
+    "esbuild": "^0.18.10",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.5"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3"
+  }
+}
